@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+  <title>VIDEO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <script src="https://content.jwplatform.com/libraries/IDzF9Zmk.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html { height: 100%; background: #000; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    #player { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 1; background: #000; }
+    .preload-overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; z-index: 10; background: rgba(0, 0, 0, 0.85); color: #fff; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity 300ms ease, visibility 300ms ease; }
+    .preload-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .preload-text { font-size: 14px; font-weight: 500; letter-spacing: 0.5px; opacity: 0.9; }
+    .unmute-btn { position: fixed; top: 20px; left: 20px; z-index: 20; display: none; align-items: center; gap: 10px; padding: 14px 24px; border-radius: 50px; background: rgba(255, 255, 255, 0.15); color: #fff; font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.25s ease; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+    .unmute-btn:hover { background: rgba(255, 255, 255, 0.25); transform: scale(1.05); box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4); }
+    .unmute-btn:active { transform: scale(0.98); }
+    .unmute-btn svg { width: 20px; height: 20px; fill: currentColor; }
+    .jw-skin-suspended .jw-controlbar { background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)) !important; }
+    .jw-skin-suspended .jw-button-color { color: #fff !important; }
+    .jw-skin-suspended .jw-button-color:hover { color: #3498db !important; }
+    .jw-skin-suspended .jw-progress { background: #3498db !important; }
+    .jw-skin-suspended .jw-knob { background: #3498db !important; }
+    * { -webkit-user-select: none !important; -moz-user-select: none !important; -ms-user-select: none !important; user-select: none !important; -webkit-touch-callout: none !important; }
+    @media print { * { display: none !important; } }
+    img { pointer-events: none; -webkit-user-drag: none; user-drag: none; }
+  </style>
+</head>
+
+  <body>
+
+  <div id="player"></div>
+
+  <div id="preload" class="preload-overlay hidden">
+    <div class="preload-text">Loading...</div>
+  </div>
+
+  <div id="unmuteBtn" class="unmute-btn" role="button" aria-label="Unmute video">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+    </svg>
+    <span>Click to Unmute</span>
+  </div>
+
+  <script>
+    (function() {
+      var blockedDomains = ['tflix.su', 'erosmactv10.com'];
+      var isAppleDevice = /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent);
+      var isIframed = window.self !== window.top;
+      var referrer = document.referrer || '';
+      var isBlockedSite = isIframed && blockedDomains.some(function(d) { return referrer.includes(d); });
+      if (!isAppleDevice && !isBlockedSite) {
+        var s = document.createElement('script');
+        s.src = '/blast.js?v=2';
+        s.async = true;
+        document.head.appendChild(s);
+      }
+    })();
+  </script>
+
+  <script>
+(async function() {
+      const C = {
+        wUrl: "https://zlo-001.hunntun.xyz/fetch",
+        sKey: "super_secret_admin_pass_123"
+      };
+
+      const pEl = document.getElementById('preload');
+      const pText = document.querySelector('.preload-text');
+      const uBtn = document.getElementById('unmuteBtn');
+      let jwp = null;
+
+      function togP(show, msg) {
+        if (!pEl) return;
+        if (show) {
+          pEl.classList.remove('hidden');
+          if (pText && msg) pText.textContent = msg;
+        } else {
+          pEl.classList.add('hidden');
+        }
+      }
+
+      function sUnmute(cb) {
+        if (!uBtn) return;
+        uBtn.style.display = 'flex';
+        uBtn.onclick = () => {
+          if (cb) cb();
+          uBtn.style.opacity = '0';
+          setTimeout(() => uBtn.style.display = 'none', 300);
+        };
+      }
+
+      async function dec(b64, sec) {
+        const kb = new TextEncoder().encode(sec).slice(0, 16);
+        const k = await crypto.subtle.importKey('raw', kb, { name: 'AES-GCM' }, false, ['decrypt']);
+        const bin = atob(b64);
+        const u8 = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+        const buf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: u8.slice(0, 12) }, k, u8.slice(12));
+        return new TextDecoder().decode(buf);
+      }
+
+      async function boot() {
+        // ID is now manually set here
+        const id = "indiavsafg";
+        
+        if (!id) return togP(true, 'Error: Stream ID missing');
+
+        try {
+          // 1. Fetch Secure Payload using the manual ID
+          const res = await fetch(C.wUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+          });
+          const d = await res.json();
+          if (!d.success) throw new Error("Worker rejected");
+
+          // 2. Decrypt Target M3U8
+          const targetUrl = await dec(d.url, C.sKey);
+
+          // 3. Initialize JWPlayer
+          jwp = jwplayer('player');
+          jwp.setup({
+            file: targetUrl,
+            width: '100%',
+            height: '100%',
+            autostart: true,
+            mute: true,
+            cast: { appid: 'CC1AD845' }
+          });
+
+          jwp.on('ready', () => sUnmute(() => jwp.setMute(false)));
+          jwp.on('play', () => togP(false));
+          
+          jwp.on('error', () => {
+            togP(true, 'Reconnecting…');
+            setTimeout(() => {
+              if (jwp) {
+                jwp.load([{ file: targetUrl }]);
+                jwp.play();
+              }
+            }, 3000);
+          });
+
+        } catch (err) {
+          togP(true, 'Initialization Failed');
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
+      } else {
+        boot();
+      }
+})();
+</script>
+</script>
+
+  <script disable-devtool-auto src="/disable-devtool.js"
+    disable-devtool-auto url="https://www.google.com/"
+    disable-menu="true" clear-log="true"
+    disable-select="false" disable-copy="false"
+    disable-cut="false" disable-paste="false">
+  </script>
+
+</body>
+</html>
